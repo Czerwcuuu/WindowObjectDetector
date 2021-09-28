@@ -1,13 +1,18 @@
+import time
+
 import cv2 as cv
 import numpy as np
 import os
+from pynput.keyboard import Key, Controller
 
 # Change the working directory to the folder this script is in.
 # Doing this because I'll be putting the files from each video in their own folder on GitHub
 
 
 class Vision:
-
+    danger_right = False
+    danger_left = False
+    key = 'a'
     # properties
     needle_img = None
     needle_w = 0
@@ -65,7 +70,6 @@ class Vision:
 
             # Loop over all the rectangles
             for (x, y, w, h) in rectangles:
-
                 # Determine the center position
                 center_x = x + int(w/2)
                 center_y = y + int(h/2)
@@ -79,11 +83,32 @@ class Vision:
                     # Draw the box
                     cv.rectangle(haystack_img, top_left, bottom_right, color=line_color,
                                 lineType=line_type, thickness=2)
+                    if (x == 268 and y == 305 and self.run == False) or (x == 268 and y == 365 and self.run == False): #prawy gora
+                        self.danger_right =True
+                    elif (x == 497 and y == 305 and self.run == False) or (x == 497 and y == 365 and self.run == False): #prawy gora
+                        self.danger_left = True
                 elif debug_mode == 'points':
                     # Draw the center point
                     cv.drawMarker(haystack_img, (center_x, center_y),
                                 color=marker_color, markerType=marker_type,
                                 markerSize=40, thickness=2)
+            if self.danger_right == True:
+                keyboard = Controller()
+                keyboard.press('a')
+                keyboard.release('a')
+                self.key = 'a'
+                self.danger_right = False
+            elif self.danger_left == True:
+                keyboard = Controller()
+                keyboard.press('d')
+                keyboard.release('d')
+                self.key = 'd'
+                self.danger_left = False
+            else:
+                keyboard = Controller()
+                keyboard.press(self.key)
+                keyboard.release(self.key)
+
 
         if debug_mode:
             cv.imshow('Matches', haystack_img)
